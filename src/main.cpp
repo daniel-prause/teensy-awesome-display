@@ -57,7 +57,7 @@ void setup() {
 
 void loop() {
     serial_communication();
-    print_fps();
+    // print_fps();
 }
 
 uint8_t buffer[8192];
