@@ -18,84 +18,82 @@
 #include "oled.h"
 
 #define SCREEN_BUFFER_SIZE 8192
-#define SERIAL_BUFFER_SIZE 4
+#define SERIAL_BUFFER_OP_SIZE 16
+#define SERIAL_BUFFER_SIZE 64
+
+#include <stdio.h>
+#include <stdlib.h>
 
 static uint8_t screen_buffer[SCREEN_BUFFER_SIZE] = {};
-static char serial_buffer[SERIAL_BUFFER_SIZE] = {};
+static char serial_buffer[SERIAL_BUFFER_OP_SIZE] = {};
 
-void write_screen();
+void print_fps();
 void serial_communication();
+byte readRegisterValueFromSerial();
+
+elapsedMillis elapsed;
+static unsigned int frame_counter = 0;
+int* fps_ptr;
+char fps_str[32];
 
 void setup() {
-    oled_begin();
-    oled_clear();
-    oled_bitmap_gray(PIC2);
-    delay(10);
-    
+    for (int i=0;i<2;i++){
+        delay(100);
+        oled_begin();
+        delay(100);
+        oled_clear();
+        delay(1000);
+        oled_clear();
+        // oled_bitmap_gray(PIC2);
+        // delay(1000);
+    }
+
+    fps_ptr = (int*) malloc(sizeof(int));
+
     unsigned long ulngStart = millis();
     Serial.begin(4608000);
-    while (!Serial && ((millis () - ulngStart) <= 666));
-    // Serial.println("Starty");
+    while (!Serial && ((millis() - ulngStart) <= 666));
 }
 
 void loop() {
-    // oled_clear();
-
-    // oled_bitmap_gray(PIC1);
-    // delay(10);
-
-    // oled_clear();
-    // oled_bitmap_gray(PIC2);
-    // delay(1000);
-
-    // oled_clear();
-    // er_oled_bitmap_mono(PIC3);
-    // delay(10);
-
-    // oled_clear();
-    // er_oled_string(0, 0, "********************************", 0);
-    // er_oled_string(32, 16, "EastRising Technology", 0);
-    // er_oled_string(40, 32, "www.buydisplay.com", 1);
-    // er_oled_string(0, 48, "********************************", 0);
-    // uint8_t i;
-    // for (i = 0; i <= 48; i++) {
-    //     command(0xa1);  //start line
-    //     data(i);
-    //     delay(100);
-    // }
-    // for (i = 48; i > 0; i--) {
-    //     command(0xa1);  //start line
-    //     data(i);
-    //     delay(100);
-    // }
-
     serial_communication();
-    delay(10);
+    print_fps();
 }
 
-void write_screen() {
-    uint16_t bytes_written = 0;
-    Serial.println("Ok");
-    uint8_t bytes_read = Serial.readBytes(serial_buffer, 8192);
+uint8_t buffer[8192];
+uint8_t maxBuffer[8];
+void serial_communication() {
+    int operation = readRegisterValueFromSerial();
+    switch (operation) {
+        case 0xE4:
+            int bytes_read = 0;
+            int total_bytes = 0;
+            while (total_bytes < 8192){
+                if (Serial.available() > 0) {
+                    bytes_read = Serial.readBytes(serial_buffer, SERIAL_BUFFER_SIZE);
+                    memcpy(screen_buffer + total_bytes, serial_buffer, bytes_read);
+                    total_bytes += bytes_read;
+                }
+            }
 
-    oled_bitmap_gray(screen_buffer);
-    
-    // while (bytes_written < 8192) {
-    //     //Serial.println("Ok");
-    //     uint8_t bytes_read = Serial.readBytes(serial_buffer, 8193);
-    //     bytes_written += bytes_read;
-    //     memcpy(tile + bytes_written, buf, bytes_read);
-    // }
-    // displayTextDebug(tft_2, String(bytes_written));
-}
-
-
-void serial_communication(){
-    int bytes_read;
-    if (Serial.available() > 0) {
-        bytes_read = Serial.readBytes(serial_buffer, SERIAL_BUFFER_SIZE);
+            oled_bitmap_gray(screen_buffer);
+            frame_counter += 1;
+            break;
     }
-    Serial.print(serial_buffer);
-    // Serial.print("@64############################################################!@128###########################################################!@192##########################################################!@256###########################################################!");
-    // Serial.flush();
+}
+
+byte readRegisterValueFromSerial() {
+    while (Serial.available() <= 0);
+    return Serial.read();
+}
+
+void print_fps(){
+    if (elapsed >= 1000){
+        *fps_ptr = frame_counter;
+        frame_counter = 0;
+        elapsed = 0;
+    }
+    memset(fps_str, 0, 32);
+    sprintf(fps_str, "%u FPS", *fps_ptr);
+    er_oled_string(0, 0, fps_str, 0);
 }

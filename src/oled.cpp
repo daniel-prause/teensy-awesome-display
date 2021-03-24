@@ -1,9 +1,5 @@
-/***************************************************
-//Web: http://www.buydisplay.com
-EastRising Technology Co.,LTD
-****************************************************/
-#include "oled.h"
 
+#include "oled.h"
 #include <SPI.h>
 
 void command(uint8_t cmd) {
@@ -30,9 +26,9 @@ void oled_begin() {
 
     digitalWrite(OLED_CS, LOW);
     digitalWrite(OLED_RST, HIGH);
-    delay(10);
+    delay(100);
     digitalWrite(OLED_RST, LOW);
-    delay(10);
+    delay(100);
     digitalWrite(OLED_RST, HIGH);
 
     command(0xFD); /*SET COMMAND LOCK*/
@@ -88,7 +84,7 @@ void oled_SetWindow(uint8_t Xstart, uint8_t Ystart, uint8_t Xend, uint8_t Yend) 
 }
 
 void oled_clear() {
-    SPI.beginTransaction(SPISettings(40000000, MSBFIRST, SPI_MODE0));
+    SPI.beginTransaction(SPISettings(SPI_CLOCKRATE, MSBFIRST, SPI_MODE0));
     int i, row;
     command(0x15);
     data(0x00);  //col start
@@ -133,7 +129,7 @@ void er_oled_char(uint8_t x, uint8_t y, const char *acsii, uint8_t mode) {
 }
 
 void er_oled_string(uint8_t x, uint8_t y, const char *pString, uint8_t Mode) {
-    // SPI.beginTransaction(SPISettings(SPI_CLOCKRATE, MSBFIRST, SPI_MODE0));
+    SPI.beginTransaction(SPISettings(SPI_CLOCKRATE, MSBFIRST, SPI_MODE0));
     while (1) {
         if (*pString == 0) {
             return;
@@ -142,7 +138,7 @@ void er_oled_string(uint8_t x, uint8_t y, const char *pString, uint8_t Mode) {
         x += 8;
         pString += 1;
     }
-    // SPI.endTransaction();
+    SPI.endTransaction();
 }
 
 void Data_processing(uint8_t temp) {  //turns 1byte B/W data to 4 bye gray data  with 8 Pixel
