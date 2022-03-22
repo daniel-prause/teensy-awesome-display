@@ -18,7 +18,7 @@
 
 #include "oled.h"
 
-#define SEALEVELPRESSURE_HPA (1013.25)
+// #define SEALEVELPRESSURE_HPA (1013.25)
 #define SCREEN_BUFFER_SIZE 8192
 #define SERIAL_BUFFER_SIZE 64
 
@@ -41,6 +41,7 @@ char fps_str[32];
 Adafruit_BME280 bme;
 
 void setup() {
+    // TODO: this is somewhat whacky...
     for (int i = 0; i < 2; i++) {
         delay(100);
         oled_begin();
@@ -65,6 +66,7 @@ void setup() {
 }
 
 void loop() {
+    /* this just prints temp and humidity, even if no software is connected */
     // temperature = bme.readTemperature();
     // humidity = bme.readHumidity();
     // memset(sensor_str, 0, 32);
@@ -73,7 +75,7 @@ void loop() {
     // delay(1000);
     
     serial_communication();
-    print_fps();
+    // print_fps();
 }
 
 uint8_t buffer[8192];
@@ -90,8 +92,6 @@ void serial_communication() {
         case 0xCD: {
             temperature = bme.readTemperature();
             humidity = bme.readHumidity();
-            // altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
-            // pressure = bme.readPressure() / 100.0F;
 
             memset(sensor_str, 0, 32);
             sprintf(sensor_str, "%.02f C   %.02f %%", temperature, humidity);
