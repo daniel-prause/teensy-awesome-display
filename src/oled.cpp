@@ -2,21 +2,24 @@
 #include "oled.h"
 #include <SPI.h>
 
-void command(uint8_t cmd) {
+void command(uint8_t cmd)
+{
     digitalWrite(OLED_DC, LOW);
     digitalWrite(OLED_CS, LOW);
     SPI.transfer(cmd);
     digitalWrite(OLED_CS, HIGH);
 }
 
-void data(uint8_t dat) {
+void data(uint8_t dat)
+{
     digitalWrite(OLED_DC, HIGH);
     digitalWrite(OLED_CS, LOW);
     SPI.transfer(dat);
     digitalWrite(OLED_CS, HIGH);
 }
 
-void oled_begin() {
+void oled_begin()
+{
     pinMode(OLED_RST, OUTPUT);
     pinMode(OLED_DC, OUTPUT);
     pinMode(OLED_CS, OUTPUT);
@@ -73,40 +76,47 @@ void oled_begin() {
     SPI.endTransaction();
 }
 
-void oled_SetWindow(uint8_t Xstart, uint8_t Ystart, uint8_t Xend, uint8_t Yend) {
+void oled_SetWindow(uint8_t Xstart, uint8_t Ystart, uint8_t Xend, uint8_t Yend)
+{
     command(0x15);
     data(Xstart + 0x1c);
     data(Xend + 0x1c);
     command(0x75);
     data(Ystart);
     data(Yend);
-    command(0x5c);  //write ram command
+    command(0x5c); // write ram command
 }
 
-void oled_clear() {
+void oled_clear()
+{
     SPI.beginTransaction(SPISettings(SPI_CLOCKRATE, MSBFIRST, SPI_MODE0));
     int i, row;
     command(0x15);
-    data(0x00);  //col start
-    data(0x77);  //col end
+    data(0x00); // col start
+    data(0x77); // col end
     command(0x75);
-    data(0x00);  //row start
-    data(0x7f);  //row end
+    data(0x00); // row start
+    data(0x7f); // row end
     command(0x5c);
-    for (row = 0; row < 128; row++) {
-        for (i = 0; i < 240; i++) {
-            data(0x00);  // write data
+    for (row = 0; row < 128; row++)
+    {
+        for (i = 0; i < 240; i++)
+        {
+            data(0x00); // write data
         }
     }
     SPI.endTransaction();
 }
 
-void oled_bitmap_gray(const uint8_t *pBuf) {
+void oled_bitmap_gray(const uint8_t *pBuf)
+{
     uint8_t row, col;
     SPI.beginTransaction(SPISettings(SPI_CLOCKRATE, MSBFIRST, SPI_MODE0));
     oled_SetWindow(0, 0, 255 / 4, 63);
-    for (row = 0; row < 64; row++) {
-        for (col = 0; col < 128; col++) {
+    for (row = 0; row < 64; row++)
+    {
+        for (col = 0; col < 128; col++)
+        {
             data(pgm_read_byte(pBuf));
             *pBuf++;
         }
@@ -115,23 +125,29 @@ void oled_bitmap_gray(const uint8_t *pBuf) {
 }
 
 // wird wohl rausrationalisiert
-void er_oled_char(uint8_t x, uint8_t y, const char *acsii, uint8_t mode) {
+void er_oled_char(uint8_t x, uint8_t y, const char *acsii, uint8_t mode)
+{
     uint8_t i, str;
     uint16_t OffSet;
     x = x / 4;
     OffSet = (*acsii - 32) * 16;
     oled_SetWindow(x, y, x + 1, y + 15);
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < 16; i++)
+    {
         str = pgm_read_byte(&AsciiLib[OffSet + i]);
-        if (mode) str = ~str;
+        if (mode)
+            str = ~str;
         Data_processing(str);
     }
 }
 
-void er_oled_string(uint8_t x, uint8_t y, const char *pString, uint8_t Mode) {
+void er_oled_string(uint8_t x, uint8_t y, const char *pString, uint8_t Mode)
+{
     SPI.beginTransaction(SPISettings(SPI_CLOCKRATE, MSBFIRST, SPI_MODE0));
-    while (1) {
-        if (*pString == 0) {
+    while (1)
+    {
+        if (*pString == 0)
+        {
             return;
         }
         er_oled_char(x, y, pString, Mode);
@@ -141,7 +157,8 @@ void er_oled_string(uint8_t x, uint8_t y, const char *pString, uint8_t Mode) {
     SPI.endTransaction();
 }
 
-void Data_processing(uint8_t temp) {  //turns 1byte B/W data to 4 bye gray data  with 8 Pixel
+void Data_processing(uint8_t temp)
+{ // turns 1byte B/W data to 4 bye gray data  with 8 Pixel
     uint8_t temp1, temp2;
 
     if (temp & 0x80)
@@ -153,7 +170,7 @@ void Data_processing(uint8_t temp) {  //turns 1byte B/W data to 4 bye gray data 
     else
         temp2 = 0x00;
     temp1 = temp1 | temp2;
-    data(temp1);  //Pixel1,Pixel2
+    data(temp1); // Pixel1,Pixel2
     if (temp & 0x20)
         temp1 = 0xf0;
     else
@@ -163,7 +180,7 @@ void Data_processing(uint8_t temp) {  //turns 1byte B/W data to 4 bye gray data 
     else
         temp2 = 0x00;
     temp1 = temp1 | temp2;
-    data(temp1);  //Pixel3,Pixel4
+    data(temp1); // Pixel3,Pixel4
     if (temp & 0x08)
         temp1 = 0xf0;
     else
@@ -173,7 +190,7 @@ void Data_processing(uint8_t temp) {  //turns 1byte B/W data to 4 bye gray data 
     else
         temp2 = 0x00;
     temp1 = temp1 | temp2;
-    data(temp1);  //Pixel5,Pixel6
+    data(temp1); // Pixel5,Pixel6
     if (temp & 0x02)
         temp1 = 0xf0;
     else
@@ -183,19 +200,36 @@ void Data_processing(uint8_t temp) {  //turns 1byte B/W data to 4 bye gray data 
     else
         temp2 = 0x00;
     temp1 = temp1 | temp2;
-    data(temp1);  //Pixel7,Pixel8
+    data(temp1); // Pixel7,Pixel8
 }
 
-void er_oled_bitmap_mono(const uint8_t *pBuf) {
+void er_oled_bitmap_mono(const uint8_t *pBuf)
+{
     uint8_t row, col, dat;
     SPI.beginTransaction(SPISettings(SPI_CLOCKRATE, MSBFIRST, SPI_MODE0));
     oled_SetWindow(0, 0, 255 / 4, 63);
-    for (row = 0; row < 64; row++) {
-        for (col = 0; col < 256 / 8; col++) {
+    for (row = 0; row < 64; row++)
+    {
+        for (col = 0; col < 256 / 8; col++)
+        {
             dat = (pgm_read_byte(pBuf));
             *pBuf++;
             Data_processing(dat);
         }
     }
+    SPI.endTransaction();
+}
+
+void display_off()
+{
+    SPI.beginTransaction(SPISettings(SPI_CLOCKRATE, MSBFIRST, SPI_MODE0));
+    command(0xAE); /*DISPLAY OFF*/
+    SPI.endTransaction();
+}
+
+void display_on()
+{
+    SPI.beginTransaction(SPISettings(SPI_CLOCKRATE, MSBFIRST, SPI_MODE0));
+    command(0xAF);
     SPI.endTransaction();
 }
