@@ -41,16 +41,11 @@ char fps_str[32];
 Adafruit_BME280 bme;
 
 void setup() {
-    // TODO: this is somewhat whacky...
     for (int i = 0; i < 2; i++) {
         delay(100);
         oled_begin();
-        delay(100);
-        oled_clear();
         delay(1000);
         oled_clear();
-        // oled_bitmap_gray(PIC2);
-        // delay(1000);
     }
 
     fps_ptr = (int*)malloc(sizeof(int));
@@ -73,9 +68,9 @@ void loop() {
     // sprintf(sensor_str, "%.02f C   %.02f %", temperature, humidity);
     // er_oled_string(0, 0, sensor_str, 0);
     // delay(1000);
-    
+
     serial_communication();
-    // print_fps();
+    print_fps(); // this keeps the SPI connection alive? i don't know ¯\_(ツ)_/¯
 }
 
 uint8_t buffer[8192];
@@ -84,6 +79,8 @@ void serial_communication() {
     int operation = readRegisterValueFromSerial();
     switch (operation) {
         case 0x11: {
+            memset(buffer, 0, sizeof(buffer));
+            oled_bitmap_gray(buffer);
             free(fps_ptr);
             setup();
             break;
@@ -132,5 +129,5 @@ void print_fps() {
     }
     memset(fps_str, 0, 32);
     sprintf(fps_str, "%u FPS", *fps_ptr);
-    er_oled_string(0, 0, fps_str, 0);
+    er_oled_string(0, -16, fps_str, 0);
 }
