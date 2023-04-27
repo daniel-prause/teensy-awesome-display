@@ -79,6 +79,7 @@ void serial_communication()
     switch (operation)
     {
     case 0x11:
+    case 0x12:
     {
         memset(buffer, 0, sizeof(buffer));
         oled_bitmap_gray(buffer);
