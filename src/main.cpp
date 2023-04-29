@@ -32,10 +32,6 @@ float altitude;
 float pressure;
 char sensor_str[32];
 
-// used for FPS counter
-elapsedMillis elapsed;
-static unsigned int frame_counter = 0;
-
 Adafruit_BME280 bme;
 
 void setup()
@@ -59,20 +55,10 @@ void setup()
 
 void loop()
 {
-    /* this just prints temp and humidity, even if no software is connected */
-    // temperature = bme.readTemperature();
-    // humidity = bme.readHumidity();
-    // memset(sensor_str, 0, 32);
-    // sprintf(sensor_str, "%.02f C   %.02f %", temperature, humidity);
-    // er_oled_string(0, 0, sensor_str, 0);
-    // delay(1000);
-
     serial_communication();
-    // print_fps();
 }
 
-uint8_t buffer[8192];
-uint8_t sensor_buffer[8];
+uint8_t buffer[SCREEN_BUFFER_SIZE];
 void serial_communication()
 {
     int operation = readRegisterValueFromSerial();
@@ -102,18 +88,17 @@ void serial_communication()
     {
         int bytes_read = 0;
         int total_bytes = 0;
-        uint8_t screen_buffer[SCREEN_BUFFER_SIZE] = {};
         char serial_buffer[SCREEN_BUFFER_SIZE];
         while (total_bytes < SCREEN_BUFFER_SIZE)
         {
             if (Serial.available() > 0)
             {
                 bytes_read = Serial.readBytes(serial_buffer, SERIAL_BUFFER_SIZE);
-                memcpy(screen_buffer + total_bytes, serial_buffer, bytes_read);
+                memcpy(buffer + total_bytes, serial_buffer, bytes_read);
                 total_bytes += bytes_read;
             }
         }
-        oled_bitmap_gray(screen_buffer);
+        oled_bitmap_gray(buffer);
         break;
     }
     }
