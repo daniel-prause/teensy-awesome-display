@@ -30,7 +30,7 @@ float temperature;
 float humidity;
 float altitude;
 float pressure;
-char sensor_str[32];
+char sensor_str[14];
 
 Adafruit_BME280 bme;
 
@@ -77,10 +77,9 @@ void serial_communication()
         temperature = bme.readTemperature();
         humidity = bme.readHumidity();
 
-        memset(sensor_str, 0, 32);
-        sprintf(sensor_str, "%.02f C   %.02f %%", temperature, humidity);
-        Serial.write(sensor_str, 32);
-        // er_oled_string(0, 0, sensor_str, 0);
+        memset(sensor_str, 0, sizeof(sensor_str));
+        snprintf(sensor_str, sizeof(sensor_str), "%.02f %.02f", temperature, humidity);
+        Serial.write(sensor_str, 14);
         break;
     }
 
