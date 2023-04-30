@@ -56,6 +56,10 @@ void setup()
 void loop()
 {
     serial_communication();
+<<<<<<< src/main.cpp
+=======
+    print_fps(); // this keeps the SPI connection alive? i don't know ¯\_(ツ)_/¯
+>>>>>>> src/main.cpp
 }
 
 uint8_t buffer[SCREEN_BUFFER_SIZE];
