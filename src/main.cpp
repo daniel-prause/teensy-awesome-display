@@ -68,7 +68,7 @@ void loop()
     // delay(1000);
 
     serial_communication();
-    // print_fps();
+    print_fps(); // this keeps the SPI connection alive? i don't know ¯\_(ツ)_/¯
 }
 
 uint8_t buffer[8192];
