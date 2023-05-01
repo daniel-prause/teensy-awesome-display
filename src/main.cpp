@@ -51,6 +51,12 @@ void setup()
         er_oled_string(0, 0, "BME error!", 0);
         delay(1000);
     }
+    bme.setSampling(Adafruit_BME280::MODE_FORCED, // takeForcedMeasurement must be called before each reading
+                    Adafruit_BME280::SAMPLING_X1, // Temp. oversampling
+                    Adafruit_BME280::SAMPLING_X1, // Pressure oversampling
+                    Adafruit_BME280::SAMPLING_X1, // Humidity oversampling
+                    Adafruit_BME280::FILTER_OFF,
+                    Adafruit_BME280::STANDBY_MS_1000);
 }
 
 void loop()
@@ -74,6 +80,7 @@ void serial_communication()
 
     case 0xCD:
     {
+        bme.takeForcedMeasurement();
         temperature = bme.readTemperature();
         humidity = bme.readHumidity();
 
