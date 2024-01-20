@@ -112,7 +112,14 @@ void serial_communication()
 
 byte readRegisterValueFromSerial()
 {
-    while (Serial.available() <= 0)
+    int started = millis();
+
+    // check for 1 second if there is data available
+    while (Serial.available() <= 0 && started + 1000 > millis())
         ;
+    if (Serial.available() <= 0)
+    {
+        return 17; // standby
+    }
     return Serial.read();
 }
