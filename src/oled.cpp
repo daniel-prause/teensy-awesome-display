@@ -158,7 +158,7 @@ void er_oled_string(uint8_t x, uint8_t y, const char *pString, uint8_t Mode)
 }
 
 void Data_processing(uint8_t temp)
-{ // turns 1byte B/W data to 4 bye gray data  with 8 Pixel
+{ // turns 1byte B/W data to 4 byte gray data  with 8 Pixel
     uint8_t temp1, temp2;
 
     if (temp & 0x80)
