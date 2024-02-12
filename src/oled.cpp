@@ -37,7 +37,7 @@ void oled_begin()
     command(0xFD); /*SET COMMAND LOCK*/
     data(0x12);    /* UNLOCK */
     command(0xAE); /*DISPLAY OFF*/
-    command(0xB3); /*DISPLAYDIVIDE CLOCKRADIO/OSCILLATAR FREQUANCY*/
+    command(0xB3); /*DISPLAYDIVIDE CLOCKRADIO/OSCILLATOR FREQUENCY*/
     data(0x91);
     command(0xCA); /*multiplex ratio*/
     data(0x3F);    /*duty = 1/64*/
@@ -124,7 +124,7 @@ void oled_bitmap_gray(const uint8_t *pBuf)
     SPI.endTransaction();
 }
 
-// wird wohl rausrationalisiert
+// will be removed soon
 void er_oled_char(uint8_t x, uint8_t y, const char *acsii, uint8_t mode)
 {
     uint8_t i, str;
